@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>マインクラフト ヘルパー - ベリティ システム</title>
+    <title>verity☻</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -132,14 +132,32 @@
     </div>
 
     <script>
-        let chatCount = 0;
-        let timerStarted = false;
+        let startTime = null;
+        let isMadMode = false;
         let isGameOver = false;
+        let secretTimer = null;
+
+        // 親切なモードのときの汎用セリフリスト
+        const friendlyReplies = [
+            "何でも聞いてね！Mobが快適にマイクラを遊べるように、僕が全力でガイドするから安心してね！",
+            "君がキーボードを叩く音、画面の向こうからいつも楽しく聞いてるよ。次は何を調べる？",
+            "マイクラのシステムデータを確認中だよ。次はどんな冒険をする予定なのかな？"
+        ];
+        let friendlyIndex = 0;
 
         function openChest() {
             document.getElementById('chest-box').style.display = 'none';
             document.getElementById('verity-avatar').style.display = 'block';
             document.getElementById('chat-container').style.display = 'block';
+            // チェストを開けた時間を記録して、ここから時間のカウントをスタート
+            startTime = Date.now();
+            
+            // 2分後（120秒後）に自動で狂気モードのフラグを立てるタイマー
+            setTimeout(() => {
+                isMadMode = true;
+                // 狂気モードになった瞬間、裏の「3分タイマー」を自動始動
+                startSecretTimer();
+            }, 120000); 
         }
 
         function handleChat() {
@@ -149,11 +167,27 @@
             const text = input.value.trim().toLowerCase();
 
             if (!text || isGameOver) return;
-            chatCount++;
             input.value = '';
 
-            // --- 【1回目：完全に友好的なモード（計算可能）】 ---
-            if (chatCount === 1) {
+            // --- 【A. 2分経過後の狂気モード（2日目）】 ---
+            if (isMadMode) {
+                // 狂気モードになって最初の送信時に背景とボタンを赤くする
+                document.body.classList.add('mad-mode');
+                btn.style.backgroundColor = "#ff3333"; 
+                
+                const madReplies = [
+                    "黙れ、お前自身に闇が3日で迫ってくる",
+                    "3日後に何かが来る",
+                    "まだ……止めれるかもしれない",
+                    "迫ってくる、もう時間が、3日……"
+                ];
+                
+                const randomIndex = Math.floor(Math.random() * madReplies.length);
+                dialogue.innerHTML = `<span style='color:#ff3333;'>${madReplies[randomIndex]}</span>`;
+            } 
+            // --- 【B. 最初から2分間までの友好的なモード】 ---
+            else {
+                // 🛠️ 計算判定（「数字 たす 数字」「数字 + 数字」）
                 const calcMatch = text.match(/(\d+)\s*(?:たす|\+)\s*(\d+)/);
 
                 if (calcMatch) {
@@ -166,50 +200,28 @@
                 } else if (text.includes("ネザー") || text.includes("ねざー")) {
                     dialogue.innerText = "ネザーに行くには黒曜石でゲートを作って、火打石と打ち金で着火してね。ピグリン対策に金の防具を1箇所つけていくのを忘れないで！";
                 } else {
-                    dialogue.innerText = "なるほど、それについてだね！システムデータを確認中だよ。快適に遊べるように、僕が全力でガイドするから安心してね！";
-                }
-            } 
-            
-            // --- 【2回目以降：狂気モード（不気味なセリフをランダム返信）】 ---
-            else if (chatCount >= 2) {
-                if (chatCount === 2) {
-                    document.body.classList.add('mad-mode');
-                    btn.style.backgroundColor = "#ff3333"; 
-                }
-                
-                // 💬 要望に基づいた「狂った言葉リスト」
-                const madReplies = [
-                    "黙れ、お前自身に闇が3日で迫ってくる",
-                    "3日後に何かが来る",
-                    "まだ……止めれるかもしれない",
-                    "迫ってくる、もう時間が、3日……"
-                ];
-                
-                // リストからランダムに1つ選んで表示
-                const randomIndex = Math.floor(Math.random() * madReplies.length);
-                dialogue.innerHTML = `<span style='color:#ff3333;'>${madReplies[randomIndex]}</span>`;
-
-                // 3回目の送信で「裏側の3分タイマー」を始動
-                if (chatCount >= 3 && !timerStarted) {
-                    startSecretTimer();
+                    // 計算や特定の鉱石以外は、親切なセリフを順番に返す
+                    dialogue.innerText = friendlyReplies[friendlyIndex];
+                    friendlyIndex = (friendlyIndex + 1) % friendlyReplies.length;
                 }
             }
         }
 
-        // 裏側で動く隠しタイマー（3分間）
+        // 裏側で動く隠しタイマー（3分間 = 180秒）
         function startSecretTimer() {
-            timerStarted = true;
-            let totalSeconds = 180; // 3分間 = 180秒
+            let totalSeconds = 180; 
 
-            const interval = setInterval(() => {
+            secretTimer = setInterval(() => {
                 totalSeconds--;
 
                 if (totalSeconds <= 0) {
-                    clearInterval(interval);
+                    clearInterval(secretTimer);
                     executeJumpScare();
                 } else if (totalSeconds <= 10) {
+                    // ラスト10秒で画面が常に激しく揺れる
                     document.body.classList.add('glitch-mode');
                 } else if (totalSeconds % 15 === 0) {
+                    // 15秒ごとに一瞬だけバグる予兆演出
                     document.body.classList.add('glitch-mode');
                     setTimeout(() => {
                         if (totalSeconds > 10) document.body.classList.remove('glitch-mode');
