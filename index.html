@@ -72,7 +72,6 @@
             border-radius: 5px;
             font-size: 1rem;
         }
-        /* グリッチと不気味な赤い背景 */
         .glitch-mode {
             animation: screenShake 0.08s infinite;
             background-color: #2b0000 !important;
@@ -82,12 +81,11 @@
             50% { transform: translate(-2px, -1px) rotate(-0.5deg); }
             100% { transform: translate(1px, -1px) rotate(0.5deg); }
         }
-        /* モンスター襲来（ジャンプスケア） */
         .jumpscare {
             width: 200vw !important;
             height: 200vw !important;
             transform: scale(3) rotate(15deg);
-            filter: invert(1) sepia(1) saturate(10) hue-rotate(320deg); /* 狂気的な色反転 */
+            filter: invert(1) sepia(1) saturate(10) hue-rotate(320deg);
             border-radius: 0% !important;
             position: absolute;
             z-index: 999;
@@ -96,8 +94,8 @@
 </head>
 <body>
 
-    <!-- Verityの画像URL -->
-    <img id="verity-avatar" src="https://phototourl.com" alt="Verity">
+    <!-- 指定されたファイル名に書き換え -->
+    <img id="verity-avatar" src="IMG_8733.png" alt="Verity">
 
     <div id="chat-container">
         <p id="dialogue">Hello, Mob! I'm Verity. Need some help in your world? ☻</p>
@@ -105,7 +103,6 @@
             <input type="text" id="user-input" placeholder="Verityに質問する...">
             <button onclick="handleChat()">送信</button>
         </div>
-        <!-- カウントダウンタイマー表示位置 -->
         <div id="countdown-timer">03:00:00</div>
     </div>
 
@@ -127,7 +124,6 @@
             } else if (turn === 2) {
                 dialogue.innerText = "ところで、君は一人暮らし？……ううん、なんでもないよ。";
             } else if (turn >= 3) {
-                // 3回目の会話で宣告イベント発動
                 startCountdownSequence();
             }
         }
@@ -137,23 +133,17 @@
             const dialogue = document.getElementById('dialogue');
             const inputArea = document.getElementById('input-area');
             const timerDisplay = document.getElementById('countdown-timer');
-            const avatar = document.getElementById('verity-avatar');
 
-            // 入力欄を消して宣告テキストに変更
             inputArea.style.display = 'none';
             dialogue.innerHTML = "<span style='color:#ff3333;'>SOMETHING IS COMING IN 3 DAYS.</span><br>（3日後に何かが来る。）";
             timerDisplay.style.display = 'block';
 
-            // ⚠️【開発・テスト用設定】
-            // 本物の3日間にする場合は「3 * 24 * 60 * 60」秒にしますが、
-            // 動作テストのために「3秒（3000ミリ秒）」の超高速カウントダウンにしています。
             let timeLeft = 3; 
 
             const interval = setInterval(() => {
                 timeLeft--;
                 if (timeLeft > 0) {
                     timerDisplay.innerText = `0${timeLeft}:00:00`;
-                    // 迫り来る予兆として少しずつ画面を揺らす
                     document.body.classList.add('glitch-mode');
                     setTimeout(() => document.body.classList.remove('glitch-mode'), 200);
                 } else {
@@ -169,7 +159,6 @@
             const timerDisplay = document.getElementById('countdown-timer');
             const avatar = document.getElementById('verity-avatar');
 
-            // 最後の襲撃
             document.body.classList.add('glitch-mode');
             dialogue.innerHTML = "<span style='color:#ff0000; font-size:1.8rem;'>IT'S ALREADY OVER, MOB! YOU ARE MINE!</span>";
             timerDisplay.style.display = 'none';
