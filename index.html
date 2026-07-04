@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Horror - Verity "3 Days"</title>
+    <style>
+        body {
+            background-color: #0b0b0b;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: background-color 0.5s;
+        }
+        #verity-avatar {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            transition: transform 0.2s, width 0.5s, height 0.5s, filter 0.5s;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        #chat-container {
+            margin-top: 25px;
+            width: 85%;
+            max-width: 450px;
+            text-align: center;
+        }
+        #dialogue {
+            font-size: 1.2rem;
+            min-height: 60px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            font-weight: bold;
+        }
+        #countdown-timer {
+            font-size: 2.5rem;
+            color: #ff3333;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        input {
+            width: 65%;
+            padding: 12px;
+            border: 1px solid #444;
+            background: #222;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 12px 20px;
+            background: #ffcc00;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        /* グリッチと不気味な赤い背景 */
+        .glitch-mode {
+            animation: screenShake 0.08s infinite;
+            background-color: #2b0000 !important;
+        }
+        @keyframes screenShake {
+            0% { transform: translate(1px, 2px) rotate(0deg); }
+            50% { transform: translate(-2px, -1px) rotate(-0.5deg); }
+            100% { transform: translate(1px, -1px) rotate(0.5deg); }
+        }
+        /* モンスター襲来（ジャンプスケア） */
+        .jumpscare {
+            width: 200vw !important;
+            height: 200vw !important;
+            transform: scale(3) rotate(15deg);
+            filter: invert(1) sepia(1) saturate(10) hue-rotate(320deg); /* 狂気的な色反転 */
+            border-radius: 0% !important;
+            position: absolute;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Verityの画像URL -->
+    <img id="verity-avatar" src="https://phototourl.com" alt="Verity">
+
+    <div id="chat-container">
+        <p id="dialogue">Hello, Mob! I'm Verity. Need some help in your world? ☻</p>
+        <div class="controls" id="input-area">
+            <input type="text" id="user-input" placeholder="Verityに質問する...">
+            <button onclick="handleChat()">送信</button>
+        </div>
+        <!-- カウントダウンタイマー表示位置 -->
+        <div id="countdown-timer">03:00:00</div>
+    </div>
+
+    <script>
+        let turn = 0;
+        let triggered = false;
+
+        function handleChat() {
+            const input = document.getElementById('user-input');
+            const dialogue = document.getElementById('dialogue');
+            const text = input.value.trim();
+
+            if (!text || triggered) return;
+            turn++;
+            input.value = '';
+
+            if (turn === 1) {
+                dialogue.innerText = "もちろん、嘘はつかないよ。君が次に何をするか教えてあげる。";
+            } else if (turn === 2) {
+                dialogue.innerText = "ところで、君は一人暮らし？……ううん、なんでもないよ。";
+            } else if (turn >= 3) {
+                // 3回目の会話で宣告イベント発動
+                startCountdownSequence();
+            }
+        }
+
+        function startCountdownSequence() {
+            triggered = true;
+            const dialogue = document.getElementById('dialogue');
+            const inputArea = document.getElementById('input-area');
+            const timerDisplay = document.getElementById('countdown-timer');
+            const avatar = document.getElementById('verity-avatar');
+
+            // 入力欄を消して宣告テキストに変更
+            inputArea.style.display = 'none';
+            dialogue.innerHTML = "<span style='color:#ff3333;'>SOMETHING IS COMING IN 3 DAYS.</span><br>（3日後に何かが来る。）";
+            timerDisplay.style.display = 'block';
+
+            // ⚠️【開発・テスト用設定】
+            // 本物の3日間にする場合は「3 * 24 * 60 * 60」秒にしますが、
+            // 動作テストのために「3秒（3000ミリ秒）」の超高速カウントダウンにしています。
+            let timeLeft = 3; 
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerDisplay.innerText = `0${timeLeft}:00:00`;
+                    // 迫り来る予兆として少しずつ画面を揺らす
+                    document.body.classList.add('glitch-mode');
+                    setTimeout(() => document.body.classList.remove('glitch-mode'), 200);
+                } else {
+                    clearInterval(interval);
+                    timerDisplay.innerText = "00:00:00";
+                    executeJumpScare();
+                }
+            }, 1000);
+        }
+
+        function executeJumpScare() {
+            const dialogue = document.getElementById('dialogue');
+            const timerDisplay = document.getElementById('countdown-timer');
+            const avatar = document.getElementById('verity-avatar');
+
+            // 最後の襲撃
+            document.body.classList.add('glitch-mode');
+            dialogue.innerHTML = "<span style='color:#ff0000; font-size:1.8rem;'>IT'S ALREADY OVER, MOB! YOU ARE MINE!</span>";
+            timerDisplay.style.display = 'none';
+            avatar.classList.add('jumpscare');
+        }
+    </script>
+</body>
+</html>
