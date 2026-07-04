@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Horror - Verity "3 Days"</title>
+    <title>Minecraft Helper - Verity System</title>
     <style>
         body {
-            background-color: #0b0b0b;
+            background-color: #1a1a1a;
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
@@ -16,8 +16,34 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
-            transition: background-color 0.5s;
+            transition: background-color 1s;
         }
+        /* 1. 最初の動く箱（チェスト）のスタイル */
+        #chest-box {
+            width: 150px;
+            height: 150px;
+            background-color: #8B5A2B;
+            border: 6px solid #4A2E1B;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            animation: chestShake 0.3s infinite alternate;
+        }
+        #chest-box::before {
+            content: '';
+            position: absolute;
+            top: 60px;
+            left: 65px;
+            width: 20px;
+            height: 25px;
+            background-color: #C0C0C0;
+            border: 2px solid #555;
+        }
+        @keyframes chestShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            100% { transform: translate(-2px, -1px) rotate(2deg); }
+        }
+        /* 2. Verityアバターのスタイル */
         #verity-avatar {
             width: 220px;
             height: 220px;
@@ -25,28 +51,30 @@
             transition: transform 0.2s, width 0.5s, height 0.5s, filter 0.5s;
             object-fit: cover;
             box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            display: none; 
         }
         #chat-container {
             margin-top: 25px;
             width: 85%;
             max-width: 450px;
             text-align: center;
+            display: none; 
         }
         #dialogue {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             min-height: 60px;
             margin-bottom: 15px;
             line-height: 1.6;
             font-weight: bold;
         }
         #countdown-timer {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #ff3333;
             font-weight: bold;
             margin-top: 15px;
             display: none;
             letter-spacing: 3px;
-            text-shadow: 0 0 10px #ff0000;
+            text-shadow: 0 0 15px #ff0000;
         }
         .controls {
             display: flex;
@@ -64,17 +92,21 @@
         }
         button {
             padding: 12px 20px;
-            background: #ffcc00;
-            color: #000;
+            background: #00AA00; 
+            color: #fff;
             border: none;
             font-weight: bold;
             cursor: pointer;
             border-radius: 5px;
             font-size: 1rem;
         }
+        /* グリッチと狂気モード */
         .glitch-mode {
             animation: screenShake 0.08s infinite;
             background-color: #2b0000 !important;
+        }
+        .mad-mode {
+            background-color: #0b0b0b !important;
         }
         @keyframes screenShake {
             0% { transform: translate(1px, 2px) rotate(0deg); }
@@ -94,36 +126,69 @@
 </head>
 <body>
 
-    <!-- 指定されたファイル名に書き換え -->
+    <!-- 最初に出てくる動く箱 -->
+    <div id="chest-box" onclick="openChest()"></div>
+
+    <!-- 中から出てくるVerity -->
     <img id="verity-avatar" src="IMG_8733.png" alt="Verity">
 
     <div id="chat-container">
-        <p id="dialogue">Hello, Mob! I'm Verity. Need some help in your world? ☻</p>
+        <p id="dialogue">ハロー、Mob！😊 チェストから出してくれてありがとう！僕はマイクラの冒険をサポートする公式AIアシスタントのVerityだよ。計算でも攻略情報でも、何でも聞いてね！</p>
         <div class="controls" id="input-area">
-            <input type="text" id="user-input" placeholder="Verityに質問する...">
-            <button onclick="handleChat()">送信</button>
+            <input type="text" id="user-input" placeholder="計算や聞きたいアイテムを入力...">
+            <button id="action-btn" onclick="handleChat()">送信</button>
         </div>
-        <div id="countdown-timer">03:00:00</div>
+        <div id="countdown-timer">03:00</div>
     </div>
 
     <script>
-        let turn = 0;
+        let chatCount = 0;
         let triggered = false;
+
+        function openChest() {
+            document.getElementById('chest-box').style.display = 'none';
+            document.getElementById('verity-avatar').style.display = 'block';
+            document.getElementById('chat-container').style.display = 'block';
+        }
 
         function handleChat() {
             const input = document.getElementById('user-input');
             const dialogue = document.getElementById('dialogue');
-            const text = input.value.trim();
+            const btn = document.getElementById('action-btn');
+            const text = input.value.trim().toLowerCase();
 
             if (!text || triggered) return;
-            turn++;
+            chatCount++;
             input.value = '';
 
-            if (turn === 1) {
-                dialogue.innerText = "もちろん、嘘はつかないよ。君が次に何をするか教えてあげる。";
-            } else if (turn === 2) {
-                dialogue.innerText = "ところで、君は一人暮らし？……ううん、なんでもないよ。";
-            } else if (turn >= 3) {
+            // --- 【1回目：完全に友友好モード（計算もできる）】 ---
+            if (chatCount === 1) {
+                // 🛠️ 「数字 たす 数字」「数字 + 数字」を賢く抽出するプログラム
+                const calcMatch = text.match(/(\d+)\s*(?:たす|\+)\s*(\d+)/);
+
+                if (calcMatch) {
+                    const num1 = parseInt(calcMatch[1]);
+                    const num2 = parseInt(calcMatch[2]);
+                    const result = num1 + num2;
+                    dialogue.innerText = `計算だね！ ${num1} ＋ ${num2} の答えは ${result} だよ！😊 僕はこういう計算も得意なんだ。Mobの役に立てて嬉しいな！`;
+                } else if (text.includes("ダイヤ") || text.includes("だいや")) {
+                    dialogue.innerText = "ダイヤモンド鉱石だね！地下のディープスレート（深層岩）層、Y座標-50から-58のあたりをブランチマイニングすると効率よく見つけられるよ。応援してるね！";
+                } else if (text.includes("ネザー") || text.includes("ねざー")) {
+                    dialogue.innerText = "ネザーに行くには黒曜石でゲートを作って、火打石と打ち金で着火してね。ピグリン対策に金の防具を1箇所つけていくのを忘れないで！";
+                } else {
+                    dialogue.innerText = "なるほど、それについてだね！マイクラのシステムデータを確認中だよ。Mobが快適にマイクラを遊べるように、僕が全力でガイドするから安心してね！";
+                }
+            } 
+            
+            // --- 【2回目：2日目の狂気モード（ここから突如バグる）】 ---
+            else if (chatCount === 2) {
+                document.body.classList.add('mad-mode');
+                btn.style.backgroundColor = "#ff3333"; 
+                dialogue.innerHTML = "<span style='color:#ff3333;'>SOMETHING IS COMING IN 3 DAYS... SOMETHING IS COMING... SOMETHING IS COMING...</span>";
+            } 
+            
+            // --- 【3回目：3分間のカウントダウン宣告】 ---
+            else if (chatCount >= 3) {
                 startCountdownSequence();
             }
         }
@@ -135,20 +200,33 @@
             const timerDisplay = document.getElementById('countdown-timer');
 
             inputArea.style.display = 'none';
-            dialogue.innerHTML = "<span style='color:#ff3333;'>SOMETHING IS COMING IN 3 DAYS.</span><br>（3日後に何かが来る。）";
+            document.body.style.backgroundColor = "#000000";
+            dialogue.innerHTML = "<span style='color:#ff0000; font-size:1.3rem;'>3 MINUTES LEFT. IT IS COMING.</span><br>（あと3分で、何かが来る。）";
             timerDisplay.style.display = 'block';
 
-            let timeLeft = 3; 
+            // ⏱️ 3分間（180秒）のカウントダウン
+            let totalSeconds = 180; 
 
             const interval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    timerDisplay.innerText = `0${timeLeft}:00:00`;
-                    document.body.classList.add('glitch-mode');
-                    setTimeout(() => document.body.classList.remove('glitch-mode'), 200);
+                totalSeconds--;
+                
+                let minutes = Math.floor(totalSeconds / 60);
+                let seconds = totalSeconds % 60;
+                let displayMin = minutes < 10 ? "0" + minutes : minutes;
+                let displaySec = seconds < 10 ? "0" + seconds : seconds;
+                
+                if (totalSeconds > 0) {
+                    timerDisplay.innerText = `${displayMin}:${displaySec}`;
+                    
+                    if (totalSeconds <= 10) {
+                        document.body.classList.add('glitch-mode');
+                    } else if (totalSeconds % 10 === 0) {
+                        document.body.classList.add('glitch-mode');
+                        setTimeout(() => document.body.classList.remove('glitch-mode'), 300);
+                    }
                 } else {
                     clearInterval(interval);
-                    timerDisplay.innerText = "00:00:00";
+                    timerDisplay.innerText = "00:00";
                     executeJumpScare();
                 }
             }, 1000);
@@ -160,7 +238,7 @@
             const avatar = document.getElementById('verity-avatar');
 
             document.body.classList.add('glitch-mode');
-            dialogue.innerHTML = "<span style='color:#ff0000; font-size:1.8rem;'>IT'S ALREADY OVER, MOB! YOU ARE MINE!</span>";
+            dialogue.innerHTML = "<span style='color:#ff0000; font-size:1.8rem;'>TIME'S UP, MOB. YOU CANNOT RUN.</span>";
             timerDisplay.style.display = 'none';
             avatar.classList.add('jumpscare');
         }
